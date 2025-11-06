@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Xóa giao dịch - Personal Finance Tracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-body">
+                <h2 class="card-title text-danger mb-4">
+                    <i class="fas fa-exclamation-triangle"></i> Xác nhận xóa
+                </h2>
+                
+                <p class="lead">Bạn có chắc chắn muốn xóa giao dịch này?</p>
+                
+                <div class="alert alert-info">
+                    <strong>{{ object }}</strong>
+                </div>
+                
+                <p class="text-muted">Hành động này không thể hoàn tác!</p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Xóa
+                        </button>
+                        <a href="{% url 'transaction_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Hủy
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

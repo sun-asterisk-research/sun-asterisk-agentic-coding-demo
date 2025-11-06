@@ -1,33 +1,103 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Django App</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            text-align: center;
-        }
-        h1 {
-            color: #0c4b33;
-        }
-        .container {
-            background-color: #f5f5f5;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Welcome to Django!</h1>
-        <p>Your Django application with PostgreSQL is running successfully.</p>
-        <p>Go to <a href="/admin">/admin</a> to access the admin panel.</p>
+{% extends 'base.html' %}
+
+{% block title %}Trang chủ - Personal Finance Tracker{% endblock %}
+
+{% block content %}
+<div class="row align-items-center" style="min-height: 70vh;">
+    <div class="col-lg-6">
+        <h1 class="display-4 fw-bold mb-4" style="color: #4CAF50;">
+            Quản lý chi tiêu thông minh
+        </h1>
+        <p class="lead text-secondary mb-4">
+            Theo dõi thu chi cá nhân một cách dễ dàng và hiệu quả. 
+            Biết rõ tiền đi đâu, tiết kiệm thông minh hơn mỗi ngày!
+        </p>
+        
+        <div class="d-flex gap-3 mb-5">
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-chart-line"></i> Xem Dashboard
+                </a>
+            {% else %}
+                <a href="{% url 'register' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-user-plus"></i> Đăng ký ngay
+                </a>
+                <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- Features -->
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-check-circle text-success fs-4 me-3"></i>
+                    <div>
+                        <h6 class="mb-1">Ghi chép dễ dàng</h6>
+                        <small class="text-muted">Thêm giao dịch chỉ trong vài giây</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-chart-pie text-success fs-4 me-3"></i>
+                    <div>
+                        <h6 class="mb-1">Biểu đồ trực quan</h6>
+                        <small class="text-muted">Xem chi tiêu qua biểu đồ đẹp mắt</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-shield-alt text-success fs-4 me-3"></i>
+                    <div>
+                        <h6 class="mb-1">An toàn & Bảo mật</h6>
+                        <small class="text-muted">Dữ liệu được mã hóa và bảo vệ</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-mobile-alt text-success fs-4 me-3"></i>
+                    <div>
+                        <h6 class="mb-1">Responsive</h6>
+                        <small class="text-muted">Sử dụng mọi lúc mọi nơi</small>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</body>
-</html>
+
+    <div class="col-lg-6">
+        <div class="text-center">
+            <i class="fas fa-wallet" style="font-size: 15rem; color: #4CAF50; opacity: 0.2;"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="row mt-5 pt-5 border-top">
+    <div class="col-md-4 text-center mb-4">
+        <div class="card p-4">
+            <i class="fas fa-users text-success fs-1 mb-3"></i>
+            <h3 class="fw-bold">1000+</h3>
+            <p class="text-muted mb-0">Người dùng đã tin tưởng</p>
+        </div>
+    </div>
+    <div class="col-md-4 text-center mb-4">
+        <div class="card p-4">
+            <i class="fas fa-receipt text-success fs-1 mb-3"></i>
+            <h3 class="fw-bold">10,000+</h3>
+            <p class="text-muted mb-0">Giao dịch được ghi nhận</p>
+        </div>
+    </div>
+    <div class="col-md-4 text-center mb-4">
+        <div class="card p-4">
+            <i class="fas fa-chart-line text-success fs-1 mb-3"></i>
+            <h3 class="fw-bold">5,000+</h3>
+            <p class="text-muted mb-0">Báo cáo được tạo</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
