@@ -1,0 +1,18 @@
+"""URL configuration for transactions app."""
+
+from django.urls import path
+from .views import (
+    TransactionListView,
+    TransactionCreateView,
+    TransactionUpdateView,
+    TransactionDeleteView
+)
+
+app_name = 'transactions'
+
+urlpatterns = [
+    path('', TransactionListView.as_view(), name='transaction_list'),
+    path('add/', TransactionCreateView.as_view(), name='transaction_create'),
+    path('<int:pk>/edit/', TransactionUpdateView.as_view(), name='transaction_update'),
+    path('<int:pk>/delete/', TransactionDeleteView.as_view(), name='transaction_delete'),
+]

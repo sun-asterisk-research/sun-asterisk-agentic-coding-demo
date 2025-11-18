@@ -32,7 +32,7 @@ cp .env.example .env
 
 ```bash
 # Build and start containers
-docker-compose up --build
+docker compose up --build
 
 # The application will be available at http://localhost:8000
 ```
@@ -41,44 +41,44 @@ docker-compose up --build
 
 ```bash
 # In a new terminal, run migrations
-docker-compose exec web python manage.py migrate
+docker compose exec web python manage.py migrate
 
 # Create a superuser for admin access
-docker-compose exec web python manage.py createsuperuser
+docker compose exec web python manage.py createsuperuser
 ```
 
 ## Common Commands
 
 ```bash
 # Start containers
-docker-compose up
+docker compose up
 
 # Start containers in detached mode
-docker-compose up -d
+docker compose up -d
 
 # Stop containers
-docker-compose down
+docker compose down
 
 # View logs
-docker-compose logs -f web
+docker compose logs -f web
 
 # Run Django commands
-docker-compose exec web python manage.py <command>
+docker compose exec web python manage.py <command>
 
 # Run migrations
-docker-compose exec web python manage.py migrate
+docker compose exec web python manage.py migrate
 
 # Create superuser
-docker-compose exec web python manage.py createsuperuser
+docker compose exec web python manage.py createsuperuser
 
 # Collect static files
-docker-compose exec web python manage.py collectstatic
+docker compose exec web python manage.py collectstatic
 
 # Access Django shell
-docker-compose exec web python manage.py shell
+docker compose exec web python manage.py shell
 
 # Access PostgreSQL
-docker-compose exec db psql -U django_user -d django_db
+docker compose exec db psql -U django_user -d django_db
 ```
 
 ## Project Structure
@@ -97,7 +97,7 @@ docker-compose exec db psql -U django_user -d django_db
 │   ├── static/            # Static files (CSS, JS, images)
 │   └── manage.py          # Django management script
 ├── Dockerfile             # Docker configuration
-├── docker-compose.yml     # Docker Compose configuration
+├── docker compose.yml     # Docker Compose configuration
 ├── requirements.txt       # Python dependencies
 ├── .env.example           # Environment variables template
 ├── .gitignore            # Git ignore file
@@ -130,7 +130,7 @@ To create a new Django app within the project:
 
 ```bash
 # Enter the Django container
-docker-compose exec web bash
+docker compose exec web bash
 
 # Create a new app (this will create it in /code directory inside container)
 python manage.py startapp myapp
@@ -163,7 +163,7 @@ For production:
 4. Use a production-grade WSGI server (gunicorn is included)
 5. Set up proper static file serving
 6. Configure database backups
-7. Use environment-specific docker-compose files
+7. Use environment-specific docker compose files
 
 ## License
 

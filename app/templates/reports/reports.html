@@ -1,0 +1,674 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports - Personal Finance Tracker{% endblock title %}
+
+{% block extra_css %}
+<style>
+    .filter-card {
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .time-range-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e5e7eb;
+        background: white;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .time-range-btn:hover {
+        border-color: #22c55e;
+        background: #f0fdf4;
+    }
+
+    .time-range-btn.active {
+        border-color: #22c55e;
+        background: #22c55e;
+        color: white;
+    }
+
+    .stat-summary-card {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: transform 0.2s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-summary-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--stat-color, #22c55e);
+    }
+
+    .stat-summary-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-summary-card .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.8;
+    }
+
+    .stat-summary-card .stat-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-summary-card .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--stat-color, #22c55e);
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 350px;
+        margin-top: 1rem;
+    }
+
+    .chart-container.small {
+        height: 300px;
+    }
+
+    .custom-date-inputs {
+        display: none;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f9fafb;
+        border-radius: 0.5rem;
+    }
+
+    .custom-date-inputs.show {
+        display: block;
+    }
+
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        border-radius: 0.5rem;
+    }
+
+    .spinner-border-custom {
+        width: 3rem;
+        height: 3rem;
+        border-width: 0.3rem;
+        border-color: #22c55e;
+        border-right-color: transparent;
+    }
+
+    .period-display {
+        display: inline-block;
+        background: #22c55e;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-3">
+            <i class="bi bi-graph-up"></i>
+            Financial Reports
+        </h1>
+        <p class="text-muted">
+            Analyze your income and expenses with interactive charts and statistics
+        </p>
+    </div>
+</div>
+
+<!-- Time Range Filter -->
+<div class="filter-card">
+    <div class="row align-items-center">
+        <div class="col-md-12">
+            <label class="form-label fw-bold">
+                <i class="bi bi-calendar-range"></i>
+                Select Time Period:
+            </label>
+            <div class="btn-group flex-wrap mb-3" role="group" aria-label="Time range selector">
+                <button type="button" class="time-range-btn" data-range="today">
+                    <i class="bi bi-calendar-day"></i> Today
+                </button>
+                <button type="button" class="time-range-btn" data-range="week">
+                    <i class="bi bi-calendar-week"></i> This Week
+                </button>
+                <button type="button" class="time-range-btn active" data-range="month">
+                    <i class="bi bi-calendar-month"></i> This Month
+                </button>
+                <button type="button" class="time-range-btn" data-range="year">
+                    <i class="bi bi-calendar"></i> This Year
+                </button>
+                <button type="button" class="time-range-btn" data-range="custom">
+                    <i class="bi bi-calendar-range"></i> Custom Range
+                </button>
+            </div>
+
+            <!-- Custom Date Range Inputs -->
+            <div class="custom-date-inputs" id="customDateInputs">
+                <div class="row">
+                    <div class="col-md-5">
+                        <label for="startDate" class="form-label">Start Date:</label>
+                        <input type="date" class="form-control" id="startDate" name="start_date">
+                    </div>
+                    <div class="col-md-5">
+                        <label for="endDate" class="form-label">End Date:</label>
+                        <input type="date" class="form-control" id="endDate" name="end_date">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-primary w-100" id="applyCustomRange">
+                            Apply
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Period Display -->
+            <div class="mt-3">
+                <span class="period-display" id="currentPeriod">
+                    <i class="bi bi-calendar-check"></i>
+                    Current Period: This Month
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Summary -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stat-summary-card" style="--stat-color: #22c55e;">
+            <div class="stat-icon">
+                <i class="bi bi-arrow-down-circle-fill" style="color: #22c55e;"></i>
+            </div>
+            <div class="stat-label">Total Income</div>
+            <div class="stat-value" id="totalIncome">{{ total_income|floatformat:0|default:"0" }} VND</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-summary-card" style="--stat-color: #ef4444;">
+            <div class="stat-icon">
+                <i class="bi bi-arrow-up-circle-fill" style="color: #ef4444;"></i>
+            </div>
+            <div class="stat-label">Total Expense</div>
+            <div class="stat-value" id="totalExpense">{{ total_expense|floatformat:0|default:"0" }} VND</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-summary-card" style="--stat-color: #3b82f6;">
+            <div class="stat-icon">
+                <i class="bi bi-wallet2" style="color: #3b82f6;"></i>
+            </div>
+            <div class="stat-label">Net Balance</div>
+            <div class="stat-value" id="netBalance">{{ balance|floatformat:0|default:"0" }} VND</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-summary-card" style="--stat-color: #8b5cf6;">
+            <div class="stat-icon">
+                <i class="bi bi-receipt" style="color: #8b5cf6;"></i>
+            </div>
+            <div class="stat-label">Transactions</div>
+            <div class="stat-value" id="totalTransactions">{{ transaction_count|default:"0" }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row">
+    <!-- Income vs Expense Bar Chart -->
+    <div class="col-lg-12">
+        <div class="chart-card position-relative">
+            <div class="loading-overlay d-none" id="barChartLoading">
+                <div class="spinner-border spinner-border-custom" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <h5 class="mb-3">
+                <i class="bi bi-bar-chart-fill text-primary"></i>
+                Income vs Expense Over Time
+            </h5>
+            <div class="chart-container">
+                <canvas id="incomeExpenseBarChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Expense by Category Pie Chart -->
+    <div class="col-lg-6">
+        <div class="chart-card position-relative">
+            <div class="loading-overlay d-none" id="pieChartLoading">
+                <div class="spinner-border spinner-border-custom" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <h5 class="mb-3">
+                <i class="bi bi-pie-chart-fill text-primary"></i>
+                Expense by Category
+            </h5>
+            <div class="chart-container small">
+                <canvas id="expensePieChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trend Line Chart -->
+    <div class="col-lg-6">
+        <div class="chart-card position-relative">
+            <div class="loading-overlay d-none" id="lineChartLoading">
+                <div class="spinner-border spinner-border-custom" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <h5 class="mb-3">
+                <i class="bi bi-graph-up text-primary"></i>
+                Financial Trend
+            </h5>
+            <div class="chart-container small">
+                <canvas id="trendLineChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export/Print Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="mb-3">Export Reports</h6>
+                <button class="btn btn-outline-primary me-2" onclick="window.print()">
+                    <i class="bi bi-printer"></i> Print Report
+                </button>
+                <button class="btn btn-outline-success" id="exportBtn" disabled>
+                    <i class="bi bi-file-earmark-spreadsheet"></i> Export to Excel
+                    <small class="text-muted">(Coming Soon)</small>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+    // Global variables
+    let currentRange = 'month';
+    let customStartDate = null;
+    let customEndDate = null;
+
+    // Chart instances
+    let barChart = null;
+    let pieChart = null;
+    let lineChart = null;
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeCharts();
+        setupEventListeners();
+        loadReportData(currentRange);
+    });
+
+    function setupEventListeners() {
+        // Time range buttons
+        document.querySelectorAll('.time-range-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('.time-range-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+
+                // Add active class to clicked button
+                this.classList.add('active');
+
+                const range = this.dataset.range;
+
+                if (range === 'custom') {
+                    document.getElementById('customDateInputs').classList.add('show');
+                } else {
+                    document.getElementById('customDateInputs').classList.remove('show');
+                    currentRange = range;
+                    updatePeriodDisplay(range);
+                    loadReportData(range);
+                }
+            });
+        });
+
+        // Apply custom date range
+        document.getElementById('applyCustomRange').addEventListener('click', function() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('Start date must be before end date');
+                return;
+            }
+
+            customStartDate = startDate;
+            customEndDate = endDate;
+            currentRange = 'custom';
+
+            updatePeriodDisplay('custom', startDate, endDate);
+            loadReportData('custom', startDate, endDate);
+        });
+    }
+
+    function updatePeriodDisplay(range, startDate = null, endDate = null) {
+        const periodDisplay = document.getElementById('currentPeriod');
+        let displayText = '';
+
+        switch(range) {
+            case 'today':
+                displayText = 'Today';
+                break;
+            case 'week':
+                displayText = 'This Week';
+                break;
+            case 'month':
+                displayText = 'This Month';
+                break;
+            case 'year':
+                displayText = 'This Year';
+                break;
+            case 'custom':
+                if (startDate && endDate) {
+                    displayText = `${formatDate(startDate)} to ${formatDate(endDate)}`;
+                }
+                break;
+        }
+
+        periodDisplay.innerHTML = `<i class="bi bi-calendar-check"></i> Current Period: ${displayText}`;
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function initializeCharts() {
+        // Initialize Bar Chart
+        const barCtx = document.getElementById('incomeExpenseBarChart');
+        barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Income',
+                        data: [],
+                        backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Expense',
+                        data: [],
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y.toLocaleString() + ' VND';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' VND';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Initialize Pie Chart
+        const pieCtx = document.getElementById('expensePieChart');
+        pieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['No Data'],
+                datasets: [{
+                    data: [1],
+                    backgroundColor: ['#e5e7eb'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return label + ': ' + value.toLocaleString() + ' VND (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Initialize Line Chart
+        const lineCtx = document.getElementById('trendLineChart');
+        lineChart = new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Net Balance',
+                        data: [],
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y.toLocaleString() + ' VND';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' VND';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function loadReportData(range, startDate = null, endDate = null) {
+        // Show loading overlays
+        showLoading();
+
+        // Build date range parameters
+        let dateParams = '';
+        if (range === 'custom' && startDate && endDate) {
+            dateParams = `date_from=${startDate}&date_to=${endDate}`;
+        }
+
+        // Load Bar Chart (income/expense over time)
+        fetch(`/reports/api/chart-data/?chart_type=bar_chart&${dateParams}`)
+            .then(response => response.json())
+            .then(data => updateBarChart(data))
+            .catch(error => console.log('Bar chart error:', error));
+
+        // Load Pie Chart (expense by category)
+        fetch(`/reports/api/chart-data/?chart_type=pie_chart&${dateParams}`)
+            .then(response => response.json())
+            .then(data => updatePieChart(data))
+            .catch(error => console.log('Pie chart error:', error));
+
+        // Load Line Chart (monthly trend)
+        fetch(`/reports/api/chart-data/?chart_type=line_chart&${dateParams}`)
+            .then(response => response.json())
+            .then(data => updateLineChart(data))
+            .catch(error => console.log('Line chart error:', error))
+            .finally(() => hideLoading());
+    }
+
+    // Statistics are now server-side rendered, no need to update via JS
+    // But keep this function for future AJAX updates
+    function updateStatistics(stats) {
+        if (stats.total_income !== undefined) {
+            document.getElementById('totalIncome').textContent =
+                (stats.total_income || 0).toLocaleString() + ' VND';
+        }
+        if (stats.total_expense !== undefined) {
+            document.getElementById('totalExpense').textContent =
+                (stats.total_expense || 0).toLocaleString() + ' VND';
+        }
+        if (stats.net_balance !== undefined) {
+            document.getElementById('netBalance').textContent =
+                (stats.net_balance || 0).toLocaleString() + ' VND';
+        }
+        if (stats.total_transactions !== undefined) {
+            document.getElementById('totalTransactions').textContent =
+                (stats.total_transactions || 0).toLocaleString();
+        }
+    }
+
+    function updateBarChart(data) {
+        if (data.labels && data.labels.length > 0) {
+            barChart.data.labels = data.labels;
+            barChart.data.datasets[0].data = data.datasets[0].data || [];
+            barChart.data.datasets[1].data = data.datasets[1].data || [];
+            barChart.update();
+        }
+    }
+
+    function updatePieChart(data) {
+        if (data.labels && data.labels.length > 0) {
+            pieChart.data.labels = data.labels;
+            pieChart.data.datasets[0].data = data.datasets[0].data || [];
+            pieChart.data.datasets[0].backgroundColor = data.datasets[0].backgroundColor || generateColors(data.labels.length);
+            pieChart.update();
+        }
+    }
+
+    function updateLineChart(data) {
+        if (data.labels && data.labels.length > 0) {
+            lineChart.data.labels = data.labels;
+            lineChart.data.datasets = data.datasets || lineChart.data.datasets;
+            lineChart.update();
+        }
+    }
+
+    function showLoading() {
+        document.getElementById('barChartLoading').classList.remove('d-none');
+        document.getElementById('pieChartLoading').classList.remove('d-none');
+        document.getElementById('lineChartLoading').classList.remove('d-none');
+    }
+
+    function hideLoading() {
+        document.getElementById('barChartLoading').classList.add('d-none');
+        document.getElementById('pieChartLoading').classList.add('d-none');
+        document.getElementById('lineChartLoading').classList.add('d-none');
+    }
+
+    function generateColors(count) {
+        const colors = [
+            '#22c55e', '#ef4444', '#3b82f6', '#f59e0b', '#8b5cf6',
+            '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16',
+            '#6366f1', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6'
+        ];
+        return colors.slice(0, count);
+    }
+</script>
+{% endblock extra_js %}

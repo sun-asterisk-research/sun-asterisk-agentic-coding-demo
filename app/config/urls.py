@@ -16,10 +16,21 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
-from django.views.generic import TemplateView
+from django.urls import path, include
+from accounts.views import ProfileView, CustomLoginView
+from reports.views import DashboardView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", TemplateView.as_view(template_name='home.html'), name='home'),
+    path("", DashboardView.as_view(), name='home'),
+    path("accounts/", include('accounts.urls')),
+    path("profile/", ProfileView.as_view(), name='profile'),
+    path("login/", CustomLoginView.as_view(), name='login_root'),
+    path("dashboard/", DashboardView.as_view(), name='dashboard'),
+    path("transactions/", include('transactions.urls')),
+    path("reports/", include('reports.urls')),
 ]
+
+# Custom error handlers
+handler404 = 'django.views.defaults.page_not_found'
+handler500 = 'django.views.defaults.server_error'

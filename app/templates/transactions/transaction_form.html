@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if object %}Edit Transaction{% else %}Add Transaction{% endif %} - Personal Finance Tracker
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="text-primary">
+                <i class="bi bi-{% if object %}pencil-square{% else %}plus-circle{% endif %}"></i>
+                {% if object %}Edit Transaction{% else %}Add Transaction{% endif %}
+            </h2>
+            <p class="text-muted">
+                {% if object %}
+                    Update your transaction details
+                {% else %}
+                    Record a new income or expense transaction
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Transaction Form Card -->
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <form method="post" action="" id="transaction-form">
+                {% csrf_token %}
+
+                <!-- Display Form Errors -->
+                {% if form.errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <h5 class="alert-heading">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Please correct the following errors:
+                        </h5>
+                        <ul class="mb-0">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+
+                <!-- Type Field (Radio buttons) -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-tag"></i>
+                        Transaction Type *
+                    </label>
+                    <div class="btn-group w-100" role="group" aria-label="Transaction type">
+                        <input
+                            type="radio"
+                            class="btn-check"
+                            name="type"
+                            id="type-income"
+                            value="income"
+                            {% if form.type.value == 'income' %}checked{% endif %}
+                            required
+                        >
+                        <label class="btn btn-outline-success" for="type-income">
+                            <i class="bi bi-arrow-up-circle"></i>
+                            Income (Thu nhập)
+                        </label>
+
+                        <input
+                            type="radio"
+                            class="btn-check"
+                            name="type"
+                            id="type-expense"
+                            value="expense"
+                            {% if form.type.value == 'expense' or not form.type.value %}checked{% endif %}
+                            required
+                        >
+                        <label class="btn btn-outline-danger" for="type-expense">
+                            <i class="bi bi-arrow-down-circle"></i>
+                            Expense (Chi tiêu)
+                        </label>
+                    </div>
+                    {% if form.type.errors %}
+                        <div class="text-danger small mt-1">{{ form.type.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Category Field -->
+                <div class="mb-3">
+                    <label for="id_category" class="form-label fw-bold">
+                        <i class="bi bi-bookmark"></i>
+                        Category *
+                    </label>
+                    <select
+                        name="category"
+                        class="form-control form-select"
+                        id="id_category"
+                        required
+                    >
+                        <option value="">-- Select Category --</option>
+                        {% for category in form.fields.category.queryset %}
+                            <option
+                                value="{{ category.id }}"
+                                data-type="{{ category.type }}"
+                                data-icon="{{ category.icon }}"
+                                {% if form.category.value == category.id|stringformat:"s" %}selected{% endif %}
+                            >
+                                {{ category.icon }} {{ category.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if form.category.errors %}
+                        <div class="text-danger small mt-1">{{ form.category.errors }}</div>
+                    {% endif %}
+                    <div class="form-text">Category will be filtered based on transaction type</div>
+                </div>
+
+                <!-- Amount Field -->
+                <div class="mb-3">
+                    <label for="amount-input" class="form-label fw-bold">
+                        <i class="bi bi-cash-stack"></i>
+                        Amount *
+                    </label>
+                    <div class="input-group">
+                        <input
+                            type="number"
+                            name="amount"
+                            class="form-control"
+                            id="amount-input"
+                            placeholder="Enter amount"
+                            step="0.01"
+                            min="0.01"
+                            value="{{ form.amount.value|default:'' }}"
+                            required
+                        >
+                        <span class="input-group-text">VND</span>
+                    </div>
+                    {% if form.amount.errors %}
+                        <div class="text-danger small mt-1">{{ form.amount.errors }}</div>
+                    {% endif %}
+                    <div class="form-text">Minimum amount is 0.01 VND</div>
+                </div>
+
+                <!-- Date Field -->
+                <div class="mb-3">
+                    <label for="date-input" class="form-label fw-bold">
+                        <i class="bi bi-calendar-event"></i>
+                        Date *
+                    </label>
+                    <input
+                        type="date"
+                        name="date"
+                        class="form-control"
+                        id="date-input"
+                        value="{{ form.date.value|date:'Y-m-d'|default:'' }}"
+                        required
+                    >
+                    {% if form.date.errors %}
+                        <div class="text-danger small mt-1">{{ form.date.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Note Field -->
+                <div class="mb-4">
+                    <label for="note-textarea" class="form-label fw-bold">
+                        <i class="bi bi-journal-text"></i>
+                        Note
+                    </label>
+                    <textarea
+                        name="note"
+                        class="form-control"
+                        id="note-textarea"
+                        rows="3"
+                        placeholder="Add a note (optional)"
+                    >{{ form.note.value|default:'' }}</textarea>
+                    {% if form.note.errors %}
+                        <div class="text-danger small mt-1">{{ form.note.errors }}</div>
+                    {% endif %}
+                    <div class="form-text">Optional: Add any additional details about this transaction</div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex gap-2 justify-content-end">
+                    <a href="{% url 'transactions:transaction_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i>
+                        {% if object %}Update Transaction{% else %}Save{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // AJAX Dynamic Category Filtering
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeInputs = document.querySelectorAll('input[name="type"]');
+        const categorySelect = document.getElementById('id_category');
+
+        if (!categorySelect) {
+            console.error('Category select element not found');
+            return;
+        }
+
+        const allOptions = Array.from(categorySelect.options);
+
+        console.log('Transaction form loaded');
+        console.log('Total options (including placeholder):', allOptions.length);
+        console.log('Category options:', allOptions.map(opt => opt.textContent.trim()).slice(0, 5));
+
+        // Function to filter categories based on selected type
+        function filterCategories() {
+            const selectedType = document.querySelector('input[name="type"]:checked');
+            if (!selectedType) return;
+
+            const typeValue = selectedType.value;
+
+            // Clear current options except the first (placeholder)
+            categorySelect.innerHTML = '<option value="">-- Select Category --</option>';
+
+            // Filter and add options based on type
+            allOptions.forEach(option => {
+                if (option.value === '') return; // Skip placeholder
+
+                const optionType = option.getAttribute('data-type');
+                if (optionType === typeValue) {
+                    categorySelect.appendChild(option.cloneNode(true));
+                }
+            });
+
+            // Reset selection if current selection doesn't match new type
+            const currentValue = categorySelect.value;
+            const validOption = Array.from(categorySelect.options).find(
+                opt => opt.value === currentValue
+            );
+            if (!validOption) {
+                categorySelect.value = '';
+            }
+        }
+
+        // Add event listeners to type radio buttons
+        typeInputs.forEach(input => {
+            input.addEventListener('change', filterCategories);
+        });
+
+        // Initial filter on page load
+        filterCategories();
+
+        // Form validation
+        const form = document.getElementById('transaction-form');
+        form.addEventListener('submit', function(event) {
+            const amount = document.getElementById('amount-input');
+            const amountValue = parseFloat(amount.value);
+
+            if (amountValue < 0.01) {
+                event.preventDefault();
+                alert('Amount must be at least 0.01 VND');
+                amount.focus();
+                return false;
+            }
+
+            const category = document.getElementById('id_category');
+            if (category && !category.value) {
+                event.preventDefault();
+                alert('Please select a category');
+                category.focus();
+                return false;
+            }
+        });
+
+        // Add visual feedback for selected type
+        typeInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                // Remove active class from all labels
+                document.querySelectorAll('.btn-check + label').forEach(label => {
+                    label.classList.remove('active');
+                });
+                // Add active class to selected label
+                if (this.checked) {
+                    this.nextElementSibling.classList.add('active');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

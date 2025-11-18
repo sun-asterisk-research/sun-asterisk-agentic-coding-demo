@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Hồ sơ của tôi - Personal Finance Tracker{% endblock title %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Hồ sơ của tôi</h4>
+            </div>
+            <div class="card-body">
+                <!-- User Information -->
+                <div class="mb-4">
+                    <h6 class="text-muted">Thông tin tài khoản</h6>
+                    <p class="mb-1">
+                        <strong>Tên đăng nhập:</strong> {{ user.username }}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Email:</strong> {{ user.email }}
+                    </p>
+                </div>
+
+                <hr>
+
+                <!-- Profile Update Form -->
+                <h6 class="text-muted mb-3">Cập nhật hồ sơ</h6>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Display Name Field -->
+                    <div class="mb-3">
+                        <label for="{{ form.display_name.id_for_label }}" class="form-label">
+                            {{ form.display_name.label }}
+                        </label>
+                        {{ form.display_name }}
+                        {% if form.display_name.help_text %}
+                            <small class="form-text text-muted">{{ form.display_name.help_text }}</small>
+                        {% endif %}
+                        {% if form.display_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.display_name.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Monthly Budget Field -->
+                    <div class="mb-3">
+                        <label for="{{ form.monthly_budget.id_for_label }}" class="form-label">
+                            {{ form.monthly_budget.label }}
+                        </label>
+                        {{ form.monthly_budget }}
+                        {% if form.monthly_budget.help_text %}
+                            <small class="form-text text-muted">{{ form.monthly_budget.help_text }}</small>
+                        {% endif %}
+                        {% if form.monthly_budget.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.monthly_budget.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            Cập nhật hồ sơ
+                        </button>
+                    </div>
+                </form>
+
+                <hr>
+
+                <!-- Change Password Link -->
+                <div class="text-center mt-3">
+                    <a href="#" class="btn btn-outline-secondary">
+                        <i class="bi bi-key"></i>
+                        Đổi mật khẩu
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
