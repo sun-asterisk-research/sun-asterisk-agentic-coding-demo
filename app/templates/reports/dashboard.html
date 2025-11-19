@@ -4,6 +4,105 @@
 
 {% block extra_css %}
 <style>
+    .hero-banner {
+        background: linear-gradient(120deg, #2563eb 0%, #9333ea 100%);
+        color: #fff;
+        border-radius: 1.25rem;
+        padding: 2.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 45px rgba(79, 70, 229, 0.35);
+    }
+
+    .hero-banner::after {
+        content: '';
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        filter: blur(5px);
+    }
+
+    .hero-label {
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        opacity: 0.85;
+    }
+
+    .hero-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        margin: 0.75rem 0;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        max-width: 36rem;
+    }
+
+    .hero-metrics {
+        margin-top: 1.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .hero-chip {
+        background-color: rgba(255, 255, 255, 0.15);
+        padding: 0.85rem 1.25rem;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        backdrop-filter: blur(4px);
+    }
+
+    .hero-chip .value {
+        font-weight: 600;
+    }
+
+    .hero-cta .btn {
+        min-width: 200px;
+        font-weight: 600;
+        padding: 0.85rem 1.5rem;
+        border-radius: 999px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+    }
+
+    .hero-cta .btn + .btn {
+        margin-left: 0.5rem;
+    }
+
+    @media (max-width: 767.98px) {
+        .hero-banner {
+            padding: 2rem 1.5rem;
+        }
+
+        .hero-title {
+            font-size: 1.75rem;
+        }
+
+        .hero-cta {
+            text-align: left;
+            margin-top: 1.5rem;
+        }
+
+        .hero-cta .btn {
+            width: 100%;
+            margin-left: 0;
+        }
+
+        .hero-cta .btn + .btn {
+            margin-top: 0.75rem;
+        }
+    }
+
     .stat-card {
         border-radius: 0.5rem;
         padding: 1.5rem;
@@ -98,21 +197,41 @@
 {% endblock extra_css %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h1 class="mb-1">Dashboard</h1>
-                <p class="text-muted mb-0">
-                    <i class="bi bi-calendar3"></i>
-                    Current Period: <span class="period-badge">{{ current_month|default:"Loading..." }}</span>
-                </p>
+<div class="hero-banner mb-4">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <span class="hero-label">Personal Finance Tracker</span>
+            <h1 class="hero-title">Chào mừng trở lại 👋</h1>
+            <p class="hero-subtitle mb-0">
+                Nắm bắt toàn bộ tình hình thu chi của bạn trong
+                <span class="period-badge">{{ current_month|default:"Loading..." }}</span>
+                và đưa ra quyết định nhanh chóng với các báo cáo thông minh.
+            </p>
+            <div class="hero-metrics">
+                <div class="hero-chip">
+                    <i class="bi bi-arrow-down-circle"></i>
+                    <span>Thu nhập:</span>
+                    <span class="value">{{ total_income|default:"0"|floatformat:0 }} VND</span>
+                </div>
+                <div class="hero-chip">
+                    <i class="bi bi-arrow-up-circle"></i>
+                    <span>Chi tiêu:</span>
+                    <span class="value">{{ total_expense|default:"0"|floatformat:0 }} VND</span>
+                </div>
+                <div class="hero-chip">
+                    <i class="bi bi-wallet2"></i>
+                    <span>Còn lại:</span>
+                    <span class="value">{{ balance|default:"0"|floatformat:0 }} VND</span>
+                </div>
             </div>
-            <div>
-                <a href="{% url 'transactions:transaction_create' %}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Add Transaction
-                </a>
-            </div>
+        </div>
+        <div class="col-lg-4 text-lg-end hero-cta">
+            <a href="{% url 'transactions:transaction_create' %}" class="btn btn-light text-primary mb-2 mb-lg-0">
+                <i class="bi bi-plus-circle"></i> Thêm giao dịch
+            </a>
+            <a href="{% url 'reports:reports' %}" class="btn btn-outline-light">
+                <i class="bi bi-graph-up"></i> Xem báo cáo
+            </a>
         </div>
     </div>
 </div>
