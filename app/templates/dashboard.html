@@ -3,11 +3,84 @@
 {% block title %}Dashboard - Personal Finance Tracker{% endblock title %}
 
 {% block content %}
-<div class="row mt-4">
+<div class="row mt-4 g-4">
     <div class="col-12">
-        <h2>Dashboard</h2>
-        <p>Welcome to your dashboard, {{ user.username }}!</p>
-        <p>This is a placeholder page. Dashboard functionality will be implemented later.</p>
+        <section class="dashboard-hero">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-7">
+                    <p class="hero-eyebrow text-uppercase mb-2">Smart finance overview</p>
+                    <h1 class="hero-title mb-3">Hello {{ user.first_name|default:user.username }},</h1>
+                    <p class="hero-subtitle mb-4">
+                        Keep track of your cash flow, set spending goals, and monitor
+                        savings progress from a single, beautiful dashboard.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="{% url 'transactions:transaction_list' %}" class="btn btn-light btn-lg me-3">
+                            <i class="bi bi-plus-circle"></i>
+                            Add new transaction
+                        </a>
+                        <a href="{% url 'reports:reports' %}" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-graph-up"></i>
+                            View reports
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="hero-stat-card">
+                        <div class="hero-stat">
+                            <span class="label">Monthly spend</span>
+                            <h3 class="value">--</h3>
+                            <small class="trend text-success">
+                                <i class="bi bi-arrow-up-right"></i>
+                                Track real-time performance soon
+                            </small>
+                        </div>
+                        <hr>
+                        <div class="hero-stat">
+                            <span class="label">Savings goal</span>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="value mb-0">--</h4>
+                                <span class="badge bg-success-subtle text-success fw-semibold">Coming up</span>
+                            </div>
+                            <small class="text-white-50">Syncing with your insights module</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-pattern"></div>
+        </section>
+    </div>
+
+    <div class="col-12">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon-wrapper bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-bullseye"></i>
+                    </div>
+                    <h3>Set smart goals</h3>
+                    <p>Outline saving targets, budgets, and milestones to guide your spending decisions.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon-wrapper bg-info bg-opacity-10 text-info">
+                        <i class="bi bi-lightning-charge"></i>
+                    </div>
+                    <h3>Track trends</h3>
+                    <p>Visualize income versus expenses to spot patterns before they impact your goals.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon-wrapper bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h3>Stay on top</h3>
+                    <p>Receive proactive nudges for upcoming bills and opportunities to save more.</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock content %}
